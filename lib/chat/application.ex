@@ -12,6 +12,7 @@ defmodule Chat.Application do
     children = [
       # Starts a worker by calling: Chat.Worker.start_link(arg1, arg2, arg3)
       worker(__MODULE__, [], function: :start_server),
+      supervisor(Phoenix.PubSub.PG2, [:chat_pubsub, []])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
@@ -24,6 +25,7 @@ defmodule Chat.Application do
     routes = [
       {"/", Chat.RootHandler, []},
       {"/greet/:name", Chat.GreetingHandler, []},
+      {"/websocket", Chat.WebsocketHandler, []},
       {"/static/[...]", :cowboy_static, {:priv_dir, :chat, "static"}}
     ]
     dispatch = :cowboy_router.compile([{:_, routes}])
