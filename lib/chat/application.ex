@@ -11,12 +11,24 @@ defmodule Chat.Application do
     # Define workers and child supervisors to be supervised
     children = [
       # Starts a worker by calling: Chat.Worker.start_link(arg1, arg2, arg3)
-      # worker(Chat.Worker, [arg1, arg2, arg3]),
+      worker(__MODULE__, [], function: :start_server),
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Chat.Supervisor]
     Supervisor.start_link(children, opts)
+  end
+
+  def start_server do
+    routes = [
+      {"/", Chat.RootHandler, []},
+      {"/greet/:name", Chat.GreetingHandler, []},
+      {"/static/[...]", :cowboy_static, {:priv_dir, :chat, "static"}}
+    ]
+    dispatch = :cowboy_router.compile([{:_, routes}])
+    opts = [{:port, 4001}]
+    env = %{dispatch: dispatch}
+    {:ok, _pid} = :cowboy.start_clear(:http, 10, opts, %{env: env})
   end
 end
