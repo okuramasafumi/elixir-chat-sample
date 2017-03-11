@@ -11,6 +11,7 @@ defmodule Chat.Application do
     # Define workers and child supervisors to be supervised
     children = [
       # Starts a worker by calling: Chat.Worker.start_link(arg1, arg2, arg3)
+      worker(RedisRepo, [], function: :start_redis_client),
       worker(__MODULE__, [], function: :start_server),
       supervisor(Phoenix.PubSub.PG2, [:chat_pubsub, []])
     ]
@@ -32,5 +33,13 @@ defmodule Chat.Application do
     opts = [{:port, 4001}]
     env = %{dispatch: dispatch}
     {:ok, _pid} = :cowboy.start_clear(:http, 10, opts, %{env: env})
+  end
+end
+
+defmodule RedisRepo do
+  def start_redis_client do
+    client = Exredis.start_using_connection_string("redis://localhost:6379")
+    true = Process.register(client, :my_redis)
+    {:ok, client}
   end
 end

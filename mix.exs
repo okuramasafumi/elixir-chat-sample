@@ -31,7 +31,8 @@ defmodule Chat.Mixfile do
   defp deps do
     [
       {:cowboy, git: "https://github.com/ninenines/cowboy.git", tag: "2.0.0-pre.7"},
-      {:phoenix_pubsub, "~> 1.0"}
+      {:phoenix_pubsub, "~> 1.0"},
+      {:exredis, ">= 0.2.4"}
     ]
   end
 end

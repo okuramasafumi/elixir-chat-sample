@@ -11,10 +11,13 @@ defmodule Chat.WebsocketHandler do
 
   def websocket_init(opts) do
     Phoenix.PubSub.subscribe(:chat_pubsub, "my_topic")
+    messages = Chat.Message.get("key") |> Enum.join("\r\n")
+    Phoenix.PubSub.broadcast!(:chat_pubsub, "my_topic", {:text, messages})
     {:ok, opts}
   end
 
   def websocket_handle({:text, content}, opts) do
+    Chat.Message.save(content)
     Phoenix.PubSub.broadcast!(:chat_pubsub, "my_topic", {:text, content})
     {:ok, opts}
   end
